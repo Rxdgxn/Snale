@@ -1,9 +1,21 @@
-import math
+import sys
+args = sys.argv
+
+if len(args) < 2:
+    print("Not enough arguments!")
+    exit(1)
+elif len(args) > 2:
+    print("Too many arguments!")
+    exit(1)
+else:
+    file = args[1]
 
 def push(arg):
     return ("PUSH", arg)
 def drop():
     return ("DROP", )
+def clear():
+    return ("CLEAR", )
 def dup():
     return ("DUP", )
 def swap():
@@ -42,46 +54,6 @@ def whilecond():
     return ("WHILE", )
 def end():
     return ("END", )
-# program = [
-#     push(0),
-#     push(100),
-#     smaller(),
-#     whilecond(),
-#         swap(),
-#         dup(),
-#         push(2),
-#         mod(),
-#         push(0),
-#         equal(),
-#         ifcond(),
-#             rot(),
-#             out(),
-#             rot(),
-#             rot(),
-#         end(),
-#         drop(),
-#         drop(),
-#         push(1),
-#         plus(),
-#         swap(),
-#     end(),
-# ]
-
-# program = [
-#     push(0),
-#     push(1),
-#     push(4000000),
-#     smaller(),
-#     whilecond(),
-#         rot(),
-#         rot(),
-#         swap(),
-#         over(),
-#         out(),
-#         plus(),
-#         rot(),
-#     end(),
-# ]
 
 program = []
 stack = []
@@ -90,35 +62,46 @@ def split_file(f):
 def parse_file(f):
     content = split_file(open(f, "r").read())
     tok = ""
+    in_string = False
     for ch in content:
-        if ch != "\n" and ch != " " and ch != "\t" and ch != "\r":
-            tok += ch
-        else:
-            if tok != '':
-                if tok == "drop": program.append(drop())
-                elif tok == "dup": program.append(dup())
-                elif tok == "swap": program.append(swap())
-                elif tok == "over": program.append(over())
-                elif tok == "rot": program.append(rot())
-                elif tok == ".": program.append(out())
-                elif tok == "+": program.append(plus())
-                elif tok == "-": program.append(minus())
-                elif tok == "*": program.append(mul())
-                elif tok == "/": program.append(div())
-                elif tok == "f/": program.append(fdiv())
-                elif tok == "%": program.append(mod())
-                elif tok == "<": program.append(smaller())
-                elif tok == "<=": program.append(smaller_equal())
-                elif tok == ">": program.append(greater())
-                elif tok == ">=": program.append(greater_equal())
-                elif tok == "==": program.append(equal())
-                elif tok == "if": program.append(ifcond())
-                elif tok == "while": program.append(whilecond())
-                elif tok == "end": program.append(end())
-                else: program.append(push(int(tok)))
-                # print(tok, "*")
-
+        if ch == '"' and not in_string: in_string = True
+        elif ch == '"' and in_string: 
+            in_string = False
+            program.append(push(tok))
             tok = ""
+        
+        if in_string and ch != '"': tok += ch
+        elif not in_string and ch != '"':
+            if ch != '\n' and ch != ' ' and ch != '\t' and ch != '\r':
+                tok += ch
+            else:
+                if tok != '':
+                    if tok == "drop": program.append(drop())
+                    elif tok == "clr": program.append(clear())
+                    elif tok == "dup": program.append(dup())
+                    elif tok == "swap": program.append(swap())
+                    elif tok == "over": program.append(over())
+                    elif tok == "rot": program.append(rot())
+                    elif tok == ".": program.append(out())
+                    elif tok == "+": program.append(plus())
+                    elif tok == "-": program.append(minus())
+                    elif tok == "*": program.append(mul())
+                    elif tok == "/": program.append(div())
+                    elif tok == "f/": program.append(fdiv())
+                    elif tok == "%": program.append(mod())
+                    elif tok == "<": program.append(smaller())
+                    elif tok == "<=": program.append(smaller_equal())
+                    elif tok == ">": program.append(greater())
+                    elif tok == ">=": program.append(greater_equal())
+                    elif tok == "=": program.append(equal())
+                    elif tok == "if": program.append(ifcond())
+                    elif tok == "while": program.append(whilecond())
+                    elif tok == "end": program.append(end())
+                    else: program.append(push(int(tok)))
+                    # print(tok, "*")
+
+                tok = ""
+
 
 def simulate(src):
     loop = []
@@ -130,6 +113,8 @@ def simulate(src):
             stack.append(tok[1])
         elif tok[0] == "DROP" and not cond_started:
             stack.pop()
+        elif tok[0] == "CLEAR" and not cond_started:
+            stack.clear()
         elif tok[0] == "DUP" and not cond_started:
             stack.append(stack[len(stack) - 1])
         elif tok[0] == "SWAP" and not cond_started:
@@ -165,6 +150,7 @@ def simulate(src):
             stack.append(a * b)
         elif tok[0] == "DIV" and not cond_started:
             assert len(stack) >= 2, "Cannot perform div op on empty value"
+            import math
             b = stack.pop()
             assert b != 0, "Cannot divide by 0"
             a = stack.pop()
@@ -235,6 +221,6 @@ def simulate(src):
         elif tok[0] != "END" and tok[0] != "IF" and cond_started:
             loop.append(tok)
 
-parse_file("test.snale")
+parse_file(file)
 # print(program)
 simulate(program)
