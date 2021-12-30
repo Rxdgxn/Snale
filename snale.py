@@ -135,7 +135,7 @@ def simulate(src):
             stack.append(c)
             stack.append(a)
         elif tok[0] == "OUT" and not cond_started:
-            print(stack[len(stack) - 1])
+            print(stack.pop())
         elif tok[0] == "PLUS" and not cond_started:
             assert len(stack) >= 2, "Cannot perform plus op on empty value"
             b = stack.pop()

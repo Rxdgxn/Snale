@@ -1,6 +1,6 @@
-0 10000 <= while
+0 1000 <= while
     swap dup 2 % 0 = if
-        rot . rot rot
+        rot dup . rot rot
     end
     drop drop
     1 +

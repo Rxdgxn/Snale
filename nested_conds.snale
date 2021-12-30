@@ -1,13 +1,13 @@
 1 0 = if
-    "Ok" . drop
+    "Ok" .
 else
     1 2 % 0 = if
-        "Div" . drop
+        "Div" .
     else
         3 2 = if
-            "Also ok" . drop
+            "Also ok" .
         else
-            "Not ok" . drop
+            "Not ok" .
         end
     end
     drop drop

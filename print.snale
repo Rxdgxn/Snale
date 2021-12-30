@@ -1,0 +1,14 @@
+
+1 5 <= while
+    swap
+    0 over < while
+        "[X]" .
+        swap
+        1 +
+        swap
+    end
+    drop drop
+    "------" .
+    1 +
+    swap
+end 

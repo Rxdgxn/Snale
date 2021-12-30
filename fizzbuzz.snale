@@ -1,20 +1,21 @@
-1 15 <= while
+1 100 <= while
     swap
     dup 15 % 0 = if
-        "FizzBuzz" . drop
+        "FizzBuzz" .
         drop drop
     else
         drop drop
         dup 3 % 0 = if
-            "Fizz" . drop
+            "Fizz" .
             drop drop
         else
             drop drop
             dup 5 % 0 = if
-                "Buzz" . drop
+                "Buzz" .
                 drop drop
             else
                 drop drop
+                dup
                 .
             end
         end
