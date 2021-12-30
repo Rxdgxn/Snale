@@ -1,0 +1,14 @@
+1 0 = if
+    "Ok" . drop
+else
+    1 2 % 0 = if
+        "Div" . drop
+    else
+        3 2 = if
+            "Also ok" . drop
+        else
+            "Not ok" . drop
+        end
+    end
+    drop drop
+end 

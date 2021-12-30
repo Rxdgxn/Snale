@@ -1,4 +1,4 @@
-0 100 <= while
+0 10000 <= while
     swap dup 2 % 0 = if
         rot . rot rot
     end

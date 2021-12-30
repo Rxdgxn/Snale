@@ -50,6 +50,8 @@ def equal():
     return ("EQUAL", )
 def ifcond():
     return ("IF", )
+def elsecond():
+    return ("ELSE", )
 def whilecond():
     return ("WHILE", )
 def end():
@@ -65,10 +67,7 @@ def parse_file(f):
     in_string = False
     for ch in content:
         if ch == '"' and not in_string: in_string = True
-        elif ch == '"' and in_string: 
-            in_string = False
-            program.append(push(tok))
-            tok = ""
+        elif ch == '"' and in_string: in_string = False
         
         if in_string and ch != '"': tok += ch
         elif not in_string and ch != '"':
@@ -95,16 +94,20 @@ def parse_file(f):
                     elif tok == ">=": program.append(greater_equal())
                     elif tok == "=": program.append(equal())
                     elif tok == "if": program.append(ifcond())
+                    elif tok == "else": program.append(elsecond())
                     elif tok == "while": program.append(whilecond())
                     elif tok == "end": program.append(end())
-                    else: program.append(push(int(tok)))
-                    # print(tok, "*")
+                    else:
+                        try: program.append(push(int(tok)))
+                        except: program.append(push(str(tok)))
 
                 tok = ""
 
 
 def simulate(src):
     loop = []
+    elseloop = []
+    whileloop = []
     conds = 0
     cond_type = None
     cond_started = False
@@ -182,44 +185,72 @@ def simulate(src):
             if not cond_started:
                 cond_started = True
                 cond_type = "if"
-            else: loop.append(tok)
+            else:
+                if cond_type == "if": loop.append(tok)
+                elif cond_type == "else": elseloop.append(tok)
+                elif cond_type == "while": whileloop.append(tok)
+        elif tok[0] == "ELSE":
+            #TODO: REWORK
+            conds -= 1
+            if conds == 0:
+                cond_type = "else"
+            else: 
+                if cond_started:
+                    if cond_type == "if": loop.append(tok)
+                    elif cond_type == "else": elseloop.append(tok)
+                    elif cond_type == "while": whileloop.append(tok)
+            conds += 1
         elif tok[0] == "WHILE":
             conds += 1
             if not cond_started:
                 cond_started = True
                 cond_type = "while"
-            else: loop.append(tok)
+            else:
+                if cond_type == "if": loop.append(tok)
+                elif cond_type == "else": elseloop.append(tok)
+                elif cond_type == "while": whileloop.append(tok)
         elif tok[0] == "END":
             conds -= 1
             if conds == 0:
                 cond_started = False
-                if cond_type == "if":
+                if cond_type != "while":
                     op = stack.pop()
                     if op == "SMALLER":
                         if stack[len(stack) - 2] < stack[len(stack) - 1]: simulate(loop)
+                        else: simulate(elseloop)
                     elif op == "SMALLER_EQUAL":
                         if stack[len(stack) - 2] <= stack[len(stack) - 1]: simulate(loop)
+                        else: simulate(elseloop)
                     elif op == "GREATER":
                         if stack[len(stack) - 2] > stack[len(stack) - 1]: simulate(loop)
+                        else: simulate(elseloop)
                     elif op == "GREATER_EQUAL":
                         if stack[len(stack) - 2] >= stack[len(stack) - 1]: simulate(loop)
+                        else: simulate(elseloop)
                     elif op == "EQUAL":
                         if stack[len(stack) - 2] == stack[len(stack) - 1]: simulate(loop)
-                elif cond_type == "while":
+                        else: simulate(elseloop)
+                else:
                     op = stack.pop()
                     if op == "SMALLER":
-                        while stack[len(stack) - 2] < stack[len(stack) - 1]: simulate(loop)
+                        while stack[len(stack) - 2] < stack[len(stack) - 1]: simulate(whileloop)
                     elif op == "SMALLER_EQUAL":
-                        while stack[len(stack) - 2] <= stack[len(stack) - 1]: simulate(loop)
+                        while stack[len(stack) - 2] <= stack[len(stack) - 1]: simulate(whileloop)
                     elif op == "GREATER":
-                        while stack[len(stack) - 2] > stack[len(stack) - 1]: simulate(loop)
+                        while stack[len(stack) - 2] > stack[len(stack) - 1]: simulate(whileloop)
                     elif op == "GREATER_EQUAL":
-                        while stack[len(stack) - 2] >= stack[len(stack) - 1]: simulate(loop)
+                        while stack[len(stack) - 2] >= stack[len(stack) - 1]: simulate(whileloop)
                     elif op == "EQUAL":
-                        while stack[len(stack) - 2] == stack[len(stack) - 1]: simulate(loop)
-            else: loop.append(tok)
-        elif tok[0] != "END" and tok[0] != "IF" and cond_started:
-            loop.append(tok)
+                        while stack[len(stack) - 2] == stack[len(stack) - 1]: simulate(whileloop)
+            else:
+                if cond_type == "if": loop.append(tok)
+                elif cond_type == "else": elseloop.append(tok)
+                elif cond_type == "while": whileloop.append(tok)
+        # elif tok[0] != "END" and tok[0] != "IF" and tok[0] != "ELSE" and tok[0] != "WHILE" and cond_started:
+        else:
+            if cond_type == "if": loop.append(tok)
+            elif cond_type == "else": elseloop.append(tok)
+            elif cond_type == "while": whileloop.append(tok)
 
 parse_file(file)
 # print(program)
