@@ -1,14 +1,23 @@
+1CT "[X]" const
+2CT "[ ]" const
+3CT 7 const
 
-1 5 <= while
-    swap
-    0 over < while
-        "[X]" .
+3CT 0 > if
+    1 3CT <= while
         swap
+        1 over <= while
+            = if
+                1CT .
+            else
+                2CT .
+            end
+            swap
+            1 +
+            swap
+        end
+        drop drop
+        nl
         1 +
         swap
     end
-    drop drop
-    "------" .
-    1 +
-    swap
 end 

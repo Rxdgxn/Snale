@@ -16,6 +16,8 @@ def drop():
     return ("DROP", )
 def clear():
     return ("CLEAR", )
+def const():
+    return ("CONST", )
 def dup():
     return ("DUP", )
 def swap():
@@ -26,6 +28,8 @@ def rot():
     return ("ROT", )
 def out():
     return ("OUT", )
+def new_line():
+    return ("NEWLINE", )
 def plus():
     return ("PLUS", )
 def minus():
@@ -59,6 +63,9 @@ def end():
 
 program = []
 stack = []
+const_names = []
+const_vals = []
+
 def split_file(f):
     return [ch for ch in f]
 def parse_file(f):
@@ -77,11 +84,13 @@ def parse_file(f):
                 if tok != '':
                     if tok == "drop": program.append(drop())
                     elif tok == "clr": program.append(clear())
+                    elif tok == "const": program.append(const())
                     elif tok == "dup": program.append(dup())
                     elif tok == "swap": program.append(swap())
                     elif tok == "over": program.append(over())
                     elif tok == "rot": program.append(rot())
                     elif tok == ".": program.append(out())
+                    elif tok == "nl": program.append(new_line())
                     elif tok == "+": program.append(plus())
                     elif tok == "-": program.append(minus())
                     elif tok == "*": program.append(mul())
@@ -113,11 +122,19 @@ def simulate(src):
     cond_started = False
     for tok in src:
         if tok[0] == "PUSH" and not cond_started:
-            stack.append(tok[1])
+            if tok[1] not in const_names:
+                stack.append(tok[1])
+            else:
+                stack.append(const_vals[const_names.index(tok[1])])
         elif tok[0] == "DROP" and not cond_started:
             stack.pop()
         elif tok[0] == "CLEAR" and not cond_started:
             stack.clear()
+        elif tok[0] == "CONST" and not cond_started:
+            val = stack.pop()
+            definition = stack.pop()
+            const_names.append(definition)
+            const_vals.append(val)
         elif tok[0] == "DUP" and not cond_started:
             stack.append(stack[len(stack) - 1])
         elif tok[0] == "SWAP" and not cond_started:
@@ -135,7 +152,9 @@ def simulate(src):
             stack.append(c)
             stack.append(a)
         elif tok[0] == "OUT" and not cond_started:
-            print(stack.pop())
+            print(stack.pop(), end='')
+        elif tok[0] == "NEWLINE" and not cond_started:
+            print()
         elif tok[0] == "PLUS" and not cond_started:
             assert len(stack) >= 2, "Cannot perform plus op on empty value"
             b = stack.pop()
@@ -246,12 +265,10 @@ def simulate(src):
                 if cond_type == "if": loop.append(tok)
                 elif cond_type == "else": elseloop.append(tok)
                 elif cond_type == "while": whileloop.append(tok)
-        # elif tok[0] != "END" and tok[0] != "IF" and tok[0] != "ELSE" and tok[0] != "WHILE" and cond_started:
         else:
             if cond_type == "if": loop.append(tok)
             elif cond_type == "else": elseloop.append(tok)
             elif cond_type == "while": whileloop.append(tok)
 
 parse_file(file)
-# print(program)
 simulate(program)
