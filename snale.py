@@ -153,8 +153,6 @@ def simulate(src):
             stack.append(c)
             stack.append(a)
         elif tok[0] == "OUT" and not cond_started:
-            # try: print(codecs.decode(stack.pop(), 'unicode_escape'), end='')
-            # except: print(stack.pop(), end='')
             if type(stack[len(stack) - 1]) == int: print(stack.pop(), end='')
             else: print(codecs.decode(stack.pop(), 'unicode_escape'), end='')
         elif tok[0] == "NEWLINE" and not cond_started:
