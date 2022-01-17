@@ -1,5 +1,5 @@
 
-"Fibonacci is epic." . nl nl
+"\nFibonacci is epic.\n\n" .
 0 1 222232244629420445529739893461909967206666939096499764990979600 <= while
     rot rot swap over dup . nl + rot
 end 
