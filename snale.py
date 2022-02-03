@@ -1,15 +1,16 @@
 import sys
 import codecs
-args = sys.argv
 
-if len(args) < 2:
+#TODO: declare macros
+
+if len(sys.argv) < 2:
     print("Not enough arguments!")
     exit(1)
-elif len(args) > 2:
+elif len(sys.argv) > 2:
     print("Too many arguments!")
     exit(1)
 else:
-    file = args[1]
+    file = sys.argv[1]
 
 def push(arg):
     return ("PUSH", arg)
@@ -121,7 +122,7 @@ def simulate(src):
     conds = 0
     cond_type = None
     cond_started = False
-    for tok in src:
+    for _, tok in enumerate(src):
         if tok[0] == "PUSH" and not cond_started:
             if tok[1] not in const_names:
                 stack.append(tok[1])
@@ -211,7 +212,6 @@ def simulate(src):
                 elif cond_type == "else": elseloop.append(tok)
                 elif cond_type == "while": whileloop.append(tok)
         elif tok[0] == "ELSE":
-            #TODO: REWORK
             conds -= 1
             if conds == 0:
                 cond_type = "else"
@@ -234,7 +234,7 @@ def simulate(src):
             conds -= 1
             if conds == 0:
                 cond_started = False
-                if cond_type != "while":
+                if cond_type == "if" or cond_type == "else":
                     op = stack.pop()
                     if op == "SMALLER":
                         if stack[len(stack) - 2] < stack[len(stack) - 1]: simulate(loop)
@@ -251,7 +251,7 @@ def simulate(src):
                     elif op == "EQUAL":
                         if stack[len(stack) - 2] == stack[len(stack) - 1]: simulate(loop)
                         else: simulate(elseloop)
-                else:
+                elif cond_type == "while":
                     op = stack.pop()
                     if op == "SMALLER":
                         while stack[len(stack) - 2] < stack[len(stack) - 1]: simulate(whileloop)
